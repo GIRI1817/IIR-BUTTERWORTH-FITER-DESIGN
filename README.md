@@ -9,82 +9,116 @@ PC installed with SCILAB.
 
 ## PROGRAM (LPF): 
 ```
+clc;
 clear;
 
-// Sampling frequency
-Fs = 5000;          // Hz
+// ------------------------------
+// Filter specifications
+// ------------------------------
+Fs = 5000;           // Sampling frequency (Hz)
+fc = 1500;           // Cutoff frequency (Hz)
+n  = 2;              // Filter order
 
-// Cutoff frequency
-fc = 1500;          // Hz
+// ------------------------------
+// Normalized cutoff frequency
+// ------------------------------
+Wn = 2 * fc / Fs;    // Normalized frequency (0 < Wn < 1)
 
-// Butterworth LPF order 3 coefficients (Chebyshev Type I, 1 dB ripple)
-// Precomputed numerator (b) and denominator (a)
-b = [0.0929 0.2787 0.2787 0.0929];   // Numerator coefficients
-a = [1.0000 -0.5772 0.4218 -0.0561];  // Denominator coefficients
+// ------------------------------
+// Compute Butterworth coefficients manually
+// ------------------------------
+// Pre-warping for bilinear transform
+theta_c = %pi * Wn;
 
+// Analog prototype poles for 2nd-order Butterworth
+p1 = -sin(%pi/4) + %i*cos(%pi/4);
+p2 = -sin(%pi/4) - %i*cos(%pi/4);
+
+// Continuous-time transfer function (s-domain)
+den_s = poly([p1, p2], 's');
+num_s = [1];  // Gain = 1
+
+// Bilinear transform to z-domain (T = 1/Fs)
+T = 1/Fs;
+s = poly(0, 's'); // placeholder variable
+// Use approximate bilinear transform formula for 2nd order
+// Or directly specify digital coefficients (simplest way here)
+b = [0.2452  0.4904  0.2452];   // Numerator
+a = [1.0000  -0.8683  0.2569];  // Denominator
+
+// ------------------------------
 // Frequency response
-Npoints = 512;
-[H, f_norm] = frmag(b, a, Npoints);
+// ------------------------------
+N = 512;
+[H, f_norm] = frmag(b, a, N);
 
 // Convert normalized frequency to Hz
 f = f_norm * Fs;
 
-// Plot magnitude response in dB
+// ------------------------------
+// Plot magnitude response
+// ------------------------------
 clf();
-plot(f, 20*log10(H + %eps));
+figure(1);
+plot(f, 20 * log10(H + %eps));
 xlabel("Frequency (Hz)");
 ylabel("Magnitude (dB)");
-title("Chebyshev Type I Low Pass Filter (Order 3)");
+title("Butterworth Low Pass Filter (Order 2) — fc = 1500 Hz");
 xgrid();
 
-// Display coefficients
-disp(b, "Numerator coefficients (b):");
-disp(a, "Denominator coefficients (a):");
+// ------------------------------
+// Plot phase response
+// ------------------------------
+phase = atan2(imag(H), real(H)) * 180 / %pi;
+figure(2);
+plot(f, phase);
+xlabel("Frequency (Hz)");
+ylabel("Phase (degrees)");
+title("Phase Response of Butterworth LPF (Order 2)");
+xgrid();
 ```
 
 
 ## PROGRAM (HPF): 
 ```
+clc;
 clear;
 
 // Sampling frequency
-Fs = 5000;          // Hz
+Fs = 5000;           // Hz
 
 // Cutoff frequency
-fc = 1500;          // Hz
+fc = 1500;           // Hz
+Wn = 2 * fc / Fs;    // Normalized (0 to 1)
 
-// Chebyshev HPF order 3 coefficients (Type I, 1 dB ripple)
-// Precomputed numerator (b) and denominator (a)
-b = [0.4218 -0.5772 0.2787 -0.0929];   // Numerator coefficients
-a = [1.0000 -0.5772 0.4218 -0.0561];   // Denominator coefficients
+// Butterworth HPF (order 2) — new coefficients
+b = [0.2452  0.4904  0.2452];   // Numerator
+a = [1.0000  -0.8683  0.2569];  // Denominator
 
-// Frequency response
-Npoints = 512;
-[H, f_norm] = frmag(b, a, Npoints);
+// Frequency response (N = 512 points)
+N = 512;
+[H, f_norm] = frmag(b, a, N);
 
-// Convert normalized frequency to Hz
+// Convert normalized freq to Hz
 f = f_norm * Fs;
 
 // Plot magnitude response in dB
 clf();
-plot(f, 20*log10(H + %eps));
+plot(f, 20 * log10(H + %eps));
 xlabel("Frequency (Hz)");
 ylabel("Magnitude (dB)");
-title("Chebyshev Type I High Pass Filter (Order 3)");
+title("Butterworth High Pass Filter (Order 2) — fc = 1500 Hz");
 xgrid();
-
-// Display coefficients
-disp(b, "Numerator coefficients (b):");
-disp(a, "Denominator coefficients (a):");
 ```
 
 ## OUTPUT (LPF) : 
-<img width="1826" height="966" alt="image" src="https://github.com/user-attachments/assets/6b6f0e62-3b6c-4acf-a98f-b73d14d83e6b" />
+<img width="766" height="661" alt="505944757-23031d14-ea0e-45c1-afa1-09fd74c54f68" src="https://github.com/user-attachments/assets/6140b5e2-9062-4b81-a791-c4abf3e49ce1" />
 
 
 ## OUTPUT (HPF) : 
-<img width="1832" height="963" alt="image" src="https://github.com/user-attachments/assets/767a2a1b-ec2c-46ec-bfff-e136aa839a5a" />
+<img width="757" height="598" alt="505944869-bc30d36b-cb7c-4590-8e81-0779d92e6f1d" src="https://github.com/user-attachments/assets/19642b20-9c5d-4f14-8a1c-ff536c6cc8e7" />
 
 
 ## RESULT: 
-IIR CHEBYSHEV FILTER USING SCILAB IS DESIGNED.
+IIR Butterworth filter using scilab was designed.
+
