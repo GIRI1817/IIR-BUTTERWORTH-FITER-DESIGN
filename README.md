@@ -8,7 +8,7 @@
 PC installed with SCILAB. 
 
 ## PROGRAM (LPF): 
-```
+```asm
 clc;
 clear;
 
@@ -80,7 +80,7 @@ xgrid();
 
 
 ## PROGRAM (HPF): 
-```
+```asm
 clc;
 clear;
 
